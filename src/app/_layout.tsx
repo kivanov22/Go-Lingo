@@ -1,7 +1,32 @@
+import { useEffect } from "react";
 import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { fontAssets } from "@/theme";
 
 import "../../global.css";
 
+// Keep the native splash screen up until the Poppins fonts are ready.
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
-  return <Stack />;
+  const [fontsLoaded, fontError] = useFonts(fontAssets);
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  return (
+    <SafeAreaProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </SafeAreaProvider>
+  );
 }

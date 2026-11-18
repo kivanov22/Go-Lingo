@@ -14,15 +14,19 @@ const CODE_LENGTH = 6;
 type VerificationModalProps = {
   visible: boolean;
   email: string;
+  error: string;
   onClose: () => void;
-  onVerified: () => void;
+  onSubmitCode: (code: string) => void;
+  onResend: () => void;
 };
 
 export default function VerificationModal({
   visible,
   email,
+  error,
   onClose,
-  onVerified,
+  onSubmitCode,
+  onResend,
 }: VerificationModalProps) {
   const [code, setCode] = useState("");
   const inputRef = useRef<TextInput>(null);
@@ -36,7 +40,7 @@ export default function VerificationModal({
     const digits = text.replace(/\D/g, "").slice(0, CODE_LENGTH);
     if (digits.length === CODE_LENGTH) {
       setCode("");
-      onVerified();
+      onSubmitCode(digits);
       return;
     }
     setCode(digits);
@@ -97,13 +101,17 @@ export default function VerificationModal({
             })}
           </Pressable>
 
+          {error !== "" && (
+            <Text className="body-medium mt-4 text-center text-red-500">{error}</Text>
+          )}
+
           <View className="mt-6 flex-row items-center justify-center">
             <Text className="body-medium text-ink-muted">Didn&apos;t receive it? </Text>
-            {/* No backend yet: resending just clears the code and refocuses */}
             <Pressable
               hitSlop={8}
               onPress={() => {
                 setCode("");
+                onResend();
                 inputRef.current?.focus();
               }}
             >

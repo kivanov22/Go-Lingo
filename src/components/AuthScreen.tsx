@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthInput from "@/components/AuthInput";
-import SocialButton from "@/components/SocialButton";
+import SocialButton, { type SocialProvider } from "@/components/SocialButton";
 import VerificationModal from "@/components/VerificationModal";
 import { images } from "@/constants/images";
 import { colors } from "@/theme";
@@ -24,6 +24,14 @@ type AuthScreenProps = {
   footerText: string;
   footerLink: string;
   onFooterPress: () => void;
+  loading: boolean;
+  error: string;
+  verifying: boolean;
+  onSubmit: (email: string, password: string) => void;
+  onVerify: (code: string) => void;
+  onResend: () => void;
+  onCloseVerify: () => void;
+  onSocialPress: (provider: SocialProvider) => void;
 };
 
 export default function AuthScreen({
@@ -34,17 +42,19 @@ export default function AuthScreen({
   footerText,
   footerLink,
   onFooterPress,
+  loading,
+  error,
+  verifying,
+  onSubmit,
+  onVerify,
+  onResend,
+  onCloseVerify,
+  onSocialPress,
 }: AuthScreenProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-
-  const handleVerified = () => {
-    setVerifying(false);
-    router.replace("/");
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -114,14 +124,25 @@ export default function AuthScreen({
             />
           )}
 
+          {/* Error from Clerk (hidden while the code modal is open) */}
+          {!verifying && error !== "" && (
+            <Text className="body-medium mt-3 text-red-500">{error}</Text>
+          )}
+
+          {/* Clerk bot protection mount point (required on sign up) */}
+          {withPassword && <View nativeID="clerk-captcha" />}
+
           {/* Main button */}
           <TouchableOpacity
             activeOpacity={0.85}
+            disabled={loading}
             onPress={() => {
               Keyboard.dismiss();
-              setVerifying(true);
+              onSubmit(email.trim(), password);
             }}
-            className="mt-5 h-[60px] items-center justify-center rounded-2xl bg-lingua-deep-purple"
+            className={`mt-5 h-[60px] items-center justify-center rounded-2xl bg-lingua-deep-purple ${
+              loading ? "opacity-60" : ""
+            }`}
             style={{
               shadowColor: colors.linguaDeepPurple,
               shadowOpacity: 0.3,
@@ -142,9 +163,9 @@ export default function AuthScreen({
 
           {/* Social buttons */}
           <View className="gap-3">
-            <SocialButton provider="Google" />
-            <SocialButton provider="Facebook" />
-            <SocialButton provider="Apple" />
+            <SocialButton provider="Google" onPress={() => onSocialPress("Google")} />
+            <SocialButton provider="Facebook" onPress={() => onSocialPress("Facebook")} />
+            <SocialButton provider="Apple" onPress={() => onSocialPress("Apple")} />
           </View>
 
           {/* Footer */}
@@ -162,8 +183,10 @@ export default function AuthScreen({
       <VerificationModal
         visible={verifying}
         email={email}
-        onClose={() => setVerifying(false)}
-        onVerified={handleVerified}
+        error={error}
+        onClose={onCloseVerify}
+        onSubmitCode={onVerify}
+        onResend={onResend}
       />
     </View>
   );

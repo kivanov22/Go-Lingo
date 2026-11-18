@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View } from "react-native";
 
-type Provider = "Google" | "Facebook" | "Apple";
+export type SocialProvider = "Google" | "Facebook" | "Apple";
+type Provider = SocialProvider;
 
 type SocialButtonProps = {
   provider: Provider;

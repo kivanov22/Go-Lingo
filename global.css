@@ -33,6 +33,13 @@
   --color-surface: #f6f7fb; /* Surface          */
   --color-background: #ffffff; /* Background        */
 
+  /* ---- Home accents (from 05-home-and-tab-navigation.png) ---- */
+  --color-cream: #fef7ee;
+  --color-cream-track: #fce8d0;
+  --color-mint: #f2f8ec;
+  --color-leaf: #6cbf3c;
+  --color-coral: #f06b6b;
+
   /* ---- Typography: Poppins family ---- */
   --font-poppins: "Poppins-Regular";
   --font-poppins-medium: "Poppins-Medium";

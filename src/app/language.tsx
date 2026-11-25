@@ -5,14 +5,34 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { images } from "@/constants/images";
 import { languages } from "@/data/languages";
+import { useLanguageStore } from "@/store/language-store";
 import { colors } from "@/theme";
 import type { LanguageCode } from "@/types/learning";
 
 export default function LanguageSelection() {
   const router = useRouter();
-  const [selected, setSelected] = useState<LanguageCode>("es");
+  const savedLanguage = useLanguageStore((state) => state.selectedLanguage);
+  const setSelectedLanguage = useLanguageStore((state) => state.setSelectedLanguage);
+  // Local draft: only saved to the store when the user taps Confirm
+  const [selected, setSelected] = useState<LanguageCode>(savedLanguage ?? "es");
   const [query, setQuery] = useState("");
   const searchRef = useRef<TextInput>(null);
+
+  // On first-time selection there is no screen to go back to
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  };
+
+  const handleConfirm = () => {
+    setSelectedLanguage(selected);
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/");
+    }
+  };
 
   const filtered = languages.filter((language) =>
     `${language.name} ${language.nativeName}`.toLowerCase().includes(query.trim().toLowerCase()),
@@ -25,7 +45,7 @@ export default function LanguageSelection() {
         <View className="h-14 items-center justify-center">
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => router.back()}
+            onPress={goBack}
             hitSlop={12}
             className="absolute left-1 size-10 items-center justify-center"
           >
@@ -116,7 +136,7 @@ export default function LanguageSelection() {
         {/* Confirm */}
         <TouchableOpacity
           activeOpacity={0.85}
-          onPress={() => router.back()}
+          onPress={handleConfirm}
           className="mt-5 h-[60px] items-center justify-center rounded-2xl bg-lingua-deep-purple"
           style={{
             shadowColor: colors.linguaDeepPurple,

@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { useLanguageStore } from "@/store/language-store";
 import { fontAssets } from "@/theme";
 
 import "../../global.css";
@@ -41,13 +42,18 @@ export default function RootLayout() {
   );
 }
 
-// Signed out: onboarding + auth screens. Signed in: home.
+// Signed out: onboarding + auth screens.
+// Signed in without a language: language selection only.
+// Signed in with a language: the tabs (and language selection to change it).
 // Expo Router redirects automatically when the guards change.
 function RootNavigator() {
   const { isLoaded, isSignedIn } = useAuth();
+  const hasHydrated = useLanguageStore((state) => state.hasHydrated);
+  const hasLanguage = useLanguageStore((state) => state.selectedLanguage !== null);
 
-  // Wait until Clerk restores the session so we don't flash the wrong screen
-  if (!isLoaded) {
+  // Wait until the Clerk session and saved language are restored so we don't
+  // flash the wrong screen
+  if (!isLoaded || !hasHydrated) {
     return null;
   }
 
@@ -57,8 +63,10 @@ function RootNavigator() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
+      <Stack.Protected guard={isSignedIn === true && hasLanguage}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
       <Stack.Protected guard={isSignedIn === true}>
-        <Stack.Screen name="index" />
         <Stack.Screen name="language" />
       </Stack.Protected>
     </Stack>

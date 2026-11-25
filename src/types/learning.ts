@@ -8,6 +8,8 @@ export type Language = {
   code: LanguageCode;
   name: string;
   nativeName: string;
+  /** "Hello" in this language, shown in the home header */
+  greeting: string;
   /** Flag image URL (flagcdn.com PNG), use with <Image source={{ uri: flag }} /> */
   flag: string;
   /** Number of learners shown on the language card, e.g. "28.4M" */
